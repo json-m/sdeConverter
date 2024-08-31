@@ -7,15 +7,8 @@ import (
 )
 
 func convertToBson(data types.I) error {
-
 	// convert all keys to strings recursively
 	convertedData := convertKeysToStrings(data)
-
-	//// assert the type of convertedData
-	//convertedMap, ok := convertedData.(map[string]interface{})
-	//if !ok {
-	//	return fmt.Errorf("failed to convert data to map[string]interface{}")
-	//}
 
 	bsonData, err := bson.Marshal(convertedData)
 	if err != nil {

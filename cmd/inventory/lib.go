@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"log"
+	"sdeConverter/pkg/types"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 func convertKeysToStrings(v interface{}) interface{} {
@@ -27,20 +31,37 @@ func convertKeysToStrings(v interface{}) interface{} {
 	return v
 }
 
-func getStringValue(m map[string]interface{}, key string) string {
-	if val, ok := m[key]; ok {
-		switch v := val.(type) {
-		case int:
-			return strconv.Itoa(v)
-		case int64:
-			return strconv.FormatInt(v, 10)
-		case float64:
-			return strconv.FormatFloat(v, 'f', -1, 64)
-		case string:
-			return v
-		default:
-			return fmt.Sprintf("%v", v)
+func worker(itemChan <-chan types.I, wg *sync.WaitGroup, processedItems *int64) {
+	defer wg.Done()
+	for item := range itemChan {
+		if bErr := convertToBson(item); bErr != nil {
+			log.Printf("Error converting item %d to BSON: %v\n", item.Id, bErr)
+		}
+		atomic.AddInt64(processedItems, 1)
+	}
+}
+
+func reportStatus(processedItems *int64, stop <-chan struct{}) {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	var lastProcessed int64
+	startTime := time.Now()
+	_ = lastProcessed
+
+	for {
+		select {
+		case <-ticker.C:
+			currentProcessed := atomic.LoadInt64(processedItems)
+			elapsedTime := time.Since(startTime).Seconds()
+			averagePerSecond := float64(currentProcessed) / elapsedTime
+
+			fmt.Printf("\rProcessed: %d, Avg: %.2f items/sec",
+				currentProcessed, averagePerSecond)
+
+			lastProcessed = currentProcessed
+		case <-stop:
+			return
 		}
 	}
-	return ""
 }

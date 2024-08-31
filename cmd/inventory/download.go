@@ -10,30 +10,7 @@ import (
 )
 
 func downloadSDE() error {
-	//bsdUrl := "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/bsd.zip"
 	fsdUrl := "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/fsd.zip"
-
-	// download bsd zip file from url to current directory
-	//out, err := os.Create("bsd.zip")
-	//if err != nil {
-	//	return err
-	//}
-	//defer out.Close()
-	//
-	//resp, err := http.Get(bsdUrl)
-	//if err != nil {
-	//	return err
-	//}
-	//defer resp.Body.Close()
-	//
-	//if resp.StatusCode != http.StatusOK {
-	//	return fmt.Errorf("status not OK: %s", resp.Status)
-	//}
-	//
-	//_, err = io.Copy(out, resp.Body)
-	//if err != nil {
-	//	return err
-	//}
 
 	// download fsd zip file from url to current directory
 	out, err := os.Create("fsd.zip")
@@ -62,15 +39,6 @@ func downloadSDE() error {
 
 // unpackSDE unpacks a zip to the current directory
 func unpackSDE() error {
-	//e, err := fastzip.NewExtractor("bsd.zip", "./bsd")
-	//if err != nil {
-	//	return err
-	//}
-	//defer e.Close()
-	//if err = e.Extract(context.TODO()); err != nil {
-	//	return err
-	//}
-
 	e, err := fastzip.NewExtractor("fsd.zip", "./fsd")
 	if err != nil {
 		return err
