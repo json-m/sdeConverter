@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"os"
@@ -30,5 +31,22 @@ func writeData(t Filetype, name string, data []byte) error {
 		return err
 	}
 
-	return os.WriteFile(outPath, data, 0644)
+	// create file
+	file, err := os.Create(outPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// compress the data with gzip
+	gzipWriter := gzip.NewWriter(file)
+	defer gzipWriter.Close()
+
+	// write the data
+	_, err = gzipWriter.Write(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
